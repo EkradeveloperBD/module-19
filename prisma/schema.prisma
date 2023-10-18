@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  admin      Int       @db.TinyInt
+  firstName  String    @map("first_name") @db.VarChar(255)
+  middleName String    @map("middle_name") @db.VarChar(255)
+  lastName   String    @map("last_name") @db.VarChar(255)
+  mobile     String    @db.VarChar(100)
+  email      String    @db.VarChar(100)
+  password   String    @db.VarChar(100)
+  registerAt DateTime? @map("register_at") @db.Timestamp(0)
+  lastLogin  DateTime? @map("last_login") @db.Timestamp(0)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime? @updatedAt @map("update_at") @db.Timestamp(0)
+
+  carts  Cart[]
+  orders Order[]
+
+  @@map("users")
+}
+
+model Category {
+  id        BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title     String    @db.VarChar(255)
+  metaTitle String    @map("meta_title") @db.VarChar(255)
+  slug      String    @db.VarChar(255)
+  content   String    @db.Text
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  categoryId  BigInt    @map("category_id") @db.UnsignedBigInt
+  name        String    @db.VarChar(255)
+  metaTitle   String    @map("meta_title") @db.VarChar(255)
+  slug        String    @db.VarChar(255)
+  summary     String    @db.VarChar(255)
+  price       Float     @db.Double
+  discount    Float     @db.Double
+  publishedAt DateTime? @map("published_at") @db.Timestamp(0)
+  startsAt    DateTime? @map("starts_at") @db.Timestamp(0)
+  endsAt      DateTime? @map("ends_at") @db.Timestamp(0)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  productsMeta   ProductMeta[]
+  productsReview ProductReview[]
+
+  Category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("products")
+}
+
+model Cart {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  userId     BigInt    @map("user_id") @db.UnsignedBigInt
+  sessionId  String    @map("session_id") @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  title      String    @db.VarChar(255)
+  firstName  String    @map("first_name") @db.VarChar(255)
+  middleName String    @map("middle_name") @db.VarChar(255)
+  lastName   String    @map("last_name") @db.VarChar(255)
+  mobile     String    @db.VarChar(100)
+  email      String    @db.VarChar(100)
+  city       String    @db.VarChar(100)
+  country    String    @db.VarChar(100)
+  status     String    @db.VarChar(100)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime? @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  User User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("carts")
+}
+
+model Order {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  userId       BigInt    @map("user_id") @db.UnsignedBigInt
+  token        String    @db.VarChar(255)
+  subTotal     Float     @map("sub_total") @db.Double
+  itemDiscount Float     @map("item_discount") @db.Double
+  tax          Float     @db.Double
+  total        Float     @db.Double
+  discount     Float     @db.Double
+  grandTotal   Float     @map("grand_total") @db.Double
+  title        String    @db.VarChar(255)
+  firstName    String    @map("first_name") @db.VarChar(255)
+  middleName   String    @map("middle_name") @db.VarChar(255)
+  lastName     String    @map("last_name") @db.VarChar(255)
+  mobile       String    @db.VarChar(100)
+  email        String    @db.VarChar(100)
+  city         String    @db.VarChar(100)
+  country      String    @db.VarChar(100)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  User User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("orders")
+}
+
+model ProductMeta {
+  id        BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  productId BigInt    @map("product_id") @db.UnsignedBigInt
+  key       String    @db.VarChar(255)
+  content   String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  Product Product @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("products_meta")
+}
+
+model ProductReview {
+  id        BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  productId BigInt    @map("product_id") @db.UnsignedBigInt
+  title     String    @db.VarChar(255)
+  rating    Float     @db.Float
+  content   String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  Product Product @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("products_review")
+}
